@@ -1,0 +1,27 @@
+{
+  "name": "@acauhi/opencode-agent-system",
+  "version": "0.1.0",
+  "description": "AgentSystem skills adapted for OpenCode — 37+ opinionated workflows for production-ready code",
+  "license": "MIT",
+  "bin": {
+    "opencode-agent-system": "./cli/index.js"
+  },
+  "files": [
+    "cli/",
+    "skills/",
+    "agents/"
+  ],
+  "dependencies": {
+    "commander": "^13.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Acauhi99/opencode-agent-system"
+  },
+  "keywords": ["opencode", "skills", "agent", "production", "code-quality", "codegraph"],
+  "author": "acauhi",
+  "type": "module"
+}
