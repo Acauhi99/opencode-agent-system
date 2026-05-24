@@ -2,6 +2,20 @@
 
 > Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) — 37+ opinionated, production-hardened SKILL.md workflows and 16 reviewer subagents, optimized for OpenCode with CodeGraph-native awareness.
 
+## Prerequisites
+
+Skills are **CodeGraph-native** — they use [CodeGraph](https://github.com/colbymchenry/codegraph) for sub-millisecond, tree-sitter-parsed codebase exploration instead of grep. Install it once per project:
+
+```bash
+# Install the CodeGraph CLI
+# See: https://github.com/colbymchenry/codegraph
+
+# Build the index for your project
+codegraph init -i
+```
+
+Skills prefer `codegraph_explore`, `codegraph_search`, `codegraph_context`, `codegraph_files`, and `codegraph_callers`. When `.codegraph/` is not initialized, they auto-detect and **fall back** to `grep` + `read` + `glob` — slower, but functional.
+
 ## Install
 
 ```bash

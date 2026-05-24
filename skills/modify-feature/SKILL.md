@@ -12,7 +12,7 @@ metadata:
 > - `question` tool for user prompts (not `AskUserQuestion`)
 > - `task` tool for subagents (not `Agent` or `Task` subagent syntax)
 > - `skill({ name: "..." })` to load other skills (not `Skill(skill="...", args="...")`)
-> - `codegraph_explore`, `codegraph_search`, `codegraph_context` for codebase exploration (preferred)
+> - `codegraph_explore`, `codegraph_search`, `codegraph_callers` for codebase exploration (preferred)
 > - `todowrite` for phase/progress tracking
 > - `grep`, `glob`, `read`, `bash` as fallback when `.codegraph/` not initialized
 >
