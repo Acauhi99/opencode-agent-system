@@ -1,6 +1,6 @@
 {
   "name": "@acauhi/opencode-agent-system",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Complete OpenCode backup: 43 skills, 16 agents, config, plugins, instructions, and setup script",
   "license": "MIT",
   "bin": {
