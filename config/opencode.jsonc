@@ -1,0 +1,106 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "/home/acauhi/.config/opencode/instructions/caveman-always.md",
+    "/home/acauhi/.config/opencode/instructions/subagent-orchestration-always.md",
+    "/home/acauhi/.config/opencode/instructions/simplify-always.md",
+    "/home/acauhi/.config/opencode/instructions/harden-types-always.md",
+    "/home/acauhi/.config/opencode/instructions/deep-thinker-always.md"
+  ],
+  "lsp": true,
+  "plugin": ["./plugin/guardrails.ts", "./plugin/agentmemory-capture.ts"],
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "repo_clone": "allow",
+    "repo_overview": "allow",
+    "lsp": "allow",
+    "doom_loop": "allow",
+    "skill": "allow",
+    "external_directory": {
+      "/home/acauhi/dev/**": "allow",
+      "/home/acauhi/.config/opencode/**": "allow",
+      "/home/acauhi/.ssh/**": "allow",
+      "/tmp/opencode/**": "allow",
+      "/home/acauhi/.ssh/id_*": "deny",
+      "/home/acauhi/.ssh/*_key": "deny",
+      "*": "ask"
+    },
+    "bash": {
+      "*": "allow",
+      "rm -rf /": "deny",
+      "rm -rf /*": "deny",
+      "rm -fr /": "deny",
+      "rm -fr /*": "deny",
+      "sudo rm -rf /": "deny",
+      "sudo rm -rf /*": "deny",
+      "sudo rm -fr /": "deny",
+      "sudo rm -fr /*": "deny",
+      "git reset --hard*": "deny",
+      "git clean -f*": "deny",
+      "mkfs*": "deny",
+      "mke2fs*": "deny",
+      "fdisk*": "deny",
+      "parted*": "deny",
+      "sgdisk*": "deny",
+      "wipefs*": "deny",
+      "dd *of=/dev/*": "deny",
+      "shred /dev/*": "deny",
+      "blkdiscard /dev/*": "deny",
+      "shutdown*": "deny",
+      "reboot*": "deny",
+      "poweroff*": "deny",
+      "halt*": "deny",
+      "sudo shutdown*": "deny",
+      "sudo reboot*": "deny",
+      "sudo poweroff*": "deny",
+      "sudo halt*": "deny",
+      "docker system prune*--volumes*": "deny",
+      "docker system prune*-a*": "deny",
+      "docker volume rm*": "deny",
+      "docker volume prune*": "deny",
+      "docker compose down *-v*": "deny",
+      "docker-compose down *-v*": "deny",
+      "terraform destroy*": "deny",
+      "tofu destroy*": "deny",
+      "pulumi destroy*": "deny"
+    }
+  },
+  "mcp": {
+    "agentmemory": {
+      "type": "local",
+      "command": ["npx", "-y", "@agentmemory/mcp"],
+      "enabled": true,
+      "env": {
+        "AGENTMEMORY_URL": "http://localhost:3111",
+        "AGENTMEMORY_FORCE_PROXY": "1",
+        "AGENTMEMORY_TOOLS": "all"
+      }
+    },
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "enabled": true
+    },
+    "headroom": {
+      "type": "local",
+      "command": ["headroom", "mcp", "serve"],
+      "enabled": true,
+      "env": {
+        "HEADROOM_PROXY_URL": "http://127.0.0.1:8787"
+      }
+    }
+  }
+}

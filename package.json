@@ -1,7 +1,7 @@
 {
   "name": "@acauhi/opencode-agent-system",
-  "version": "0.1.1",
-  "description": "AgentSystem skills adapted for OpenCode — 37+ opinionated workflows for production-ready code",
+  "version": "0.2.0",
+  "description": "Complete OpenCode backup: 43 skills, 16 agents, config, plugins, instructions, and setup script",
   "license": "MIT",
   "bin": {
     "opencode-agent-system": "./cli/index.js"
@@ -9,7 +9,9 @@
   "files": [
     "cli/",
     "skills/",
-    "agents/"
+    "agents/",
+    "config/",
+    "scripts/"
   ],
   "dependencies": {
     "commander": "^13.1.0"

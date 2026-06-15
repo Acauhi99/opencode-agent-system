@@ -1,28 +1,37 @@
 # OpenCode Agent System
 
-> Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) — 37+ opinionated, production-hardened SKILL.md workflows and 16 reviewer subagents, optimized for OpenCode with CodeGraph-native awareness.
+> Complete backup of an OpenCode environment: 43 skills, 16 agents, config, plugins, instructions, and a fully automated setup script. If your PC catches fire, one command rebuilds everything.
 
-## Prerequisites
+Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) — opinionated, production-hardened SKILL.md workflows and reviewer subagents, optimized for OpenCode with CodeGraph-native awareness.
 
-Skills are **CodeGraph-native** — they use [CodeGraph](https://github.com/colbymchenry/codegraph) for sub-millisecond, tree-sitter-parsed codebase exploration instead of grep. Install it once per project:
+## What's Included
+
+| Component | Count | Description |
+|-----------|-------|-------------|
+| Skills | 43 | Workflow orchestrators (features, bugs, audits, git, docs, infra) |
+| Agents | 16 | Read-only reviewers + utility subagents |
+| Instructions | 5 | Behavioral rules loaded every session |
+| Plugins | 2 | Guardrails (bash safety) + AgentMemory capture |
+| Commands | 2 | `/recall` and `/remember` for persistent memory |
+| Config | 1 | `opencode.jsonc` + `AGENTS.md` |
+| Wrapper | 1 | Auto-starts AgentMemory before OpenCode |
+| Setup script | 1 | Fully automated installation from scratch |
+
+## Quick Start (Full Setup)
+
+If you have a fresh machine:
 
 ```bash
-# Install the CodeGraph CLI
-# See: https://github.com/colbymchenry/codegraph
-
-# Build the index for your project
-codegraph init -i
+git clone https://github.com/Acauhi99/opencode-agent-system.git
+cd opencode-agent-system
+bash scripts/setup.sh
 ```
 
-Skills prefer `codegraph_explore`, `codegraph_search`, `codegraph_context`, `codegraph_files`, and `codegraph_callers`. When `.codegraph/` is not initialized, they auto-detect and **fall back** to `grep` + `read` + `glob` — slower, but functional.
+This installs everything: Node.js, OpenCode binary, MCP servers, LSP servers, config files, skills, agents, and the wrapper script.
 
-## Install
+## Install (CLI Only)
 
-```bash
-npx @acauhi/opencode-agent-system init
-```
-
-Or global:
+If you just want to install skills/agents/config into an existing OpenCode setup:
 
 ```bash
 npx @acauhi/opencode-agent-system init --global
@@ -32,35 +41,88 @@ npx @acauhi/opencode-agent-system init --global
 
 | Flag | Description |
 |------|-------------|
-| `--force`, `-f` | Overwrite existing skill files |
-| `--skip-agents` | Install skills only, skip subagents |
-| `--dest <dir>` | Custom base directory (default: `.opencode/`) |
+| `--force`, `-f` | Overwrite existing files |
+| `--skip-agents` | Skip installing agents |
+| `--skip-skills` | Skip installing skills |
+| `--skip-config` | Skip installing config (instructions, plugins, commands) |
+| `--global`, `-g` | Install to `~/.config/opencode/` |
+| `--dest <dir>` | Custom base directory |
+
+## Commands
+
+```bash
+# List all available skills, agents, and config
+npx @acauhi/opencode-agent-system list
+
+# Install everything
+npx @acauhi/opencode-agent-system init --global
+
+# Remove everything
+npx @acauhi/opencode-agent-system uninstall --global
+
+# Run full setup script
+npx @acauhi/opencode-agent-system setup
+```
 
 ## Usage
 
 After installing, open OpenCode and use these commands:
 
 ```
-/ship "describe your goal"     # autopilot — classifies intent, picks depth, routes to core skill
-/add-feature "..."             # end-to-end feature delivery
-/fix-bug "..."                 # diagnose silent failures
-/audit                         # whole-codebase tech-debt sweep
+/start "describe your goal"     # universal entry point — classifies intent, picks depth, routes
+/add-feature "..."              # end-to-end feature delivery
+/fix-bug "..."                  # diagnose silent failures
+/audit                          # whole-codebase tech-debt sweep
+/recall [query]                 # search past session memories
+/remember [insight]             # save to persistent memory
 ```
 
-See all skills: `npx @acauhi/opencode-agent-system list`
+## Project Structure
 
-## Skills
+```
+opencode-agent-system/
+├── cli/
+│   └── index.js              # CLI: init, list, uninstall, setup
+├── agents/                   # 16 subagent definitions (.md)
+├── skills/                   # 43 skill directories (SKILL.md each)
+├── config/                   # OpenCode config backup
+│   ├── opencode.jsonc        # Main config (MCP, permissions, plugins)
+│   ├── AGENTS.md             # CodeGraph usage guide
+│   ├── instructions/         # 5 behavioral instruction files
+│   ├── plugins/              # 2 TypeScript plugins
+│   └── commands/             # 2 custom commands
+├── scripts/                  # Setup automation
+│   ├── setup.sh              # Full install script
+│   ├── opencode-wrapper      # Wrapper that auto-starts AgentMemory
+│   └── requirements.txt      # Global npm packages list
+├── package.json
+├── README.md
+└── LICENSE
+```
 
-37 skills covering: workflow orchestration, feature delivery, debugging, code quality, refactoring, UI/UX polish, audits, release management, docs sync.
+## Prerequisites
 
-## Subagents
+Skills are **CodeGraph-native** — they use [CodeGraph](https://github.com/colbymchenry/codegraph) for sub-millisecond, tree-sitter-parsed codebase exploration instead of grep. The setup script installs CodeGraph automatically.
 
-16 subagents (11 reviewers + 5 operational) for: authz, security, data integrity, contracts, concurrency, error boundaries, loading states, a11y, client bundle, observability, performance, and more.
+For manual installation:
+
+```bash
+npm install -g @colbymchenry/codegraph
+codegraph init -i  # per-project
+```
+
+Skills fall back to `grep` + `read` + `glob` when `.codegraph/` is not initialized.
+
+## AgentMemory
+
+The wrapper script auto-starts [AgentMemory](https://github.com/rohitg00/agentmemory) for persistent cross-session memory. It captures session observations, tool usage, and context — then recalls them in future sessions.
+
+- `/recall [query]` — search past sessions
+- `/remember [insight]` — save to long-term memory
 
 ## Uninstall
 
 ```bash
-npx @acauhi/opencode-agent-system uninstall
 npx @acauhi/opencode-agent-system uninstall --global
 ```
 

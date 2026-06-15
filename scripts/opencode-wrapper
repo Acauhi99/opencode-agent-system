@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+AGENTMEMORY_URL="${AGENTMEMORY_URL:-http://localhost:3111}"
+AGENTMEMORY_HOME="${AGENTMEMORY_HOME:-$HOME/.agentmemory}"
+AGENTMEMORY_LOG="${AGENTMEMORY_LOG:-$AGENTMEMORY_HOME/agentmemory.log}"
+AGENTMEMORY_LOCK="$AGENTMEMORY_HOME/start.lock"
+AGENTMEMORY_START_TIMEOUT_SECONDS="${AGENTMEMORY_START_TIMEOUT_SECONDS:-20}"
+AGENTMEMORY_NPX_PACKAGE="${AGENTMEMORY_NPX_PACKAGE:-@agentmemory/agentmemory@0.9.19}"
+REAL_OPENCODE="${OPENCODE_REAL_BIN:-$HOME/.opencode/bin/opencode}"
+
+agentmemory_health() {
+  curl -fsS --max-time 2 "$AGENTMEMORY_URL/agentmemory/health" >/dev/null 2>&1 || \
+    curl -fsS --max-time 2 "$AGENTMEMORY_URL/agentmemory/livez" >/dev/null 2>&1
+}
+
+wait_for_agentmemory() {
+  local waited=0
+  while (( waited < AGENTMEMORY_START_TIMEOUT_SECONDS )); do
+    agentmemory_health && return 0
+    sleep 1
+    (( waited++ ))
+  done
+  return 1
+}
+
+start_agentmemory_if_needed() {
+  agentmemory_health && return 0
+
+  mkdir -p "$AGENTMEMORY_HOME"
+
+  (
+    flock -x 9
+
+    agentmemory_health && exit 0
+
+    printf '[opencode wrapper] starting agentmemory at %s\n' "$(date -Is)" >> "$AGENTMEMORY_LOG"
+    nohup env AGENTMEMORY_TOOLS="${AGENTMEMORY_TOOLS:-all}" AGENTMEMORY_DROP_STALE_INDEX=true npx -y "$AGENTMEMORY_NPX_PACKAGE" --tools all \
+      >> "$AGENTMEMORY_LOG" 2>&1 < /dev/null &
+
+    wait_for_agentmemory || true
+  ) 9>"$AGENTMEMORY_LOCK"
+
+  if ! agentmemory_health; then
+    printf '[opencode wrapper] agentmemory did not become ready; continuing with opencode\n' >&2
+  fi
+}
+
+if [[ ! -x "$REAL_OPENCODE" ]]; then
+  printf '[opencode wrapper] real opencode not executable: %s\n' "$REAL_OPENCODE" >&2
+  exit 127
+fi
+
+start_agentmemory_if_needed
+exec "$REAL_OPENCODE" "$@"
