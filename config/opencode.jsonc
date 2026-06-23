@@ -8,7 +8,11 @@
     "/home/acauhi/.config/opencode/instructions/deep-thinker-always.md"
   ],
   "lsp": true,
-  "plugin": ["./plugin/guardrails.ts", "./plugin/agentmemory-capture.ts"],
+  "plugin": [
+    "./plugin/guardrails.ts",
+    "./plugin/agentmemory-capture.ts",
+    "./ponytail/.opencode/plugins/ponytail.mjs"
+  ],
   "permission": {
     "read": "allow",
     "edit": "allow",

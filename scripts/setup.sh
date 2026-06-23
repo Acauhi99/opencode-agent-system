@@ -116,6 +116,17 @@ install_npm_packages() {
 }
 
 # =============================================================================
+# 4b. Initialize git submodules (Ponytail)
+# =============================================================================
+init_submodules() {
+  if [[ -f "$REPO_DIR/.gitmodules" ]]; then
+    info "Initializing git submodules..."
+    (cd "$REPO_DIR" && git submodule update --init --recursive)
+    ok "Submodules initialized"
+  fi
+}
+
+# =============================================================================
 # 5. Copy config files
 # =============================================================================
 copy_config() {
@@ -126,6 +137,7 @@ copy_config() {
   mkdir -p "$OPENCODE_CONFIG_DIR/commands"
   mkdir -p "$OPENCODE_CONFIG_DIR/skills"
   mkdir -p "$OPENCODE_CONFIG_DIR/agents"
+  mkdir -p "$OPENCODE_CONFIG_DIR/ponytail"
 
   # Main config
   cp "$REPO_DIR/config/opencode.jsonc" "$OPENCODE_CONFIG_DIR/opencode.jsonc"
@@ -139,19 +151,42 @@ copy_config() {
   for f in "$REPO_DIR/config/instructions/"*.md; do
     cp "$f" "$OPENCODE_CONFIG_DIR/instructions/"
   done
-  ok "Copied 5 instruction files"
+  ok "Copied $(ls "$REPO_DIR/config/instructions/"*.md | wc -l) instruction files"
 
   # Plugins
   for f in "$REPO_DIR/config/plugins/"*.ts; do
     cp "$f" "$OPENCODE_CONFIG_DIR/plugin/"
   done
-  ok "Copied 2 plugin files"
+  ok "Copied $(ls "$REPO_DIR/config/plugins/"*.ts | wc -l) plugin files"
 
   # Commands
   for f in "$REPO_DIR/config/commands/"*.md; do
     cp "$f" "$OPENCODE_CONFIG_DIR/commands/"
   done
-  ok "Copied 2 command files"
+  ok "Copied $(ls "$REPO_DIR/config/commands/"*.md | wc -l) command files"
+
+  # Ponytail (git submodule at repo root, vendored into ~/.config/opencode/ponytail/)
+  if [[ -d "$REPO_DIR/ponytail" && -f "$REPO_DIR/ponytail/.opencode/plugins/ponytail.mjs" ]]; then
+    cp -r "$REPO_DIR/ponytail/." "$OPENCODE_CONFIG_DIR/ponytail/"
+    ok "Copied ponytail (lazy senior dev mode)"
+
+    # Symlink 6 ponytail commands
+    for f in "$REPO_DIR/ponytail/.opencode/command/"ponytail*.md; do
+      [[ -f "$f" ]] || continue
+      ln -sf "$OPENCODE_CONFIG_DIR/ponytail/.opencode/command/$(basename "$f")" \
+             "$OPENCODE_CONFIG_DIR/commands/$(basename "$f")"
+    done
+    ok "Symlinked 6 ponytail commands"
+
+    # Ponytail default-mode config (~/.config/ponytail/config.json)
+    mkdir -p "$HOME/.config/ponytail"
+    if [[ ! -f "$HOME/.config/ponytail/config.json" ]]; then
+      printf '{\n  "defaultMode": "full"\n}\n' > "$HOME/.config/ponytail/config.json"
+      ok "Created ~/.config/ponytail/config.json (defaultMode: full)"
+    fi
+  else
+    warn "ponytail/ submodule not initialized; run 'git submodule update --init' and re-run setup"
+  fi
 
   # Skills
   cp -r "$REPO_DIR/skills/"* "$OPENCODE_CONFIG_DIR/skills/"
@@ -240,6 +275,20 @@ verify() {
     warn "Agents: $agent_count/16 (expected 16)"
   fi
 
+  # Check Ponytail
+  if [[ -f "$OPENCODE_CONFIG_DIR/ponytail/.opencode/plugins/ponytail.mjs" ]]; then
+    ok "Ponytail: vendored at $OPENCODE_CONFIG_DIR/ponytail/"
+  else
+    warn "Ponytail: not installed (run: git submodule update --init && bash scripts/setup.sh)"
+  fi
+  local pt_cmd_count
+  pt_cmd_count=$(ls "$OPENCODE_CONFIG_DIR/commands/ponytail"*.md 2>/dev/null | wc -l)
+  if (( pt_cmd_count == 6 )); then
+    ok "Ponytail commands: $pt_cmd_count/6"
+  else
+    warn "Ponytail commands: $pt_cmd_count/6"
+  fi
+
   # Check global npm packages
   local packages=(
     "@agentmemory/agentmemory"
@@ -278,6 +327,7 @@ main() {
   install_node
   install_opencode
   install_npm_packages
+  init_submodules
   copy_config
   install_wrapper
   verify

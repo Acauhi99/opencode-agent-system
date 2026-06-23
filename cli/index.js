@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { readFileSync, existsSync, mkdirSync, cpSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, cpSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, dirname, basename, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { symlinkSync, unlinkSync, lstatSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -219,6 +220,54 @@ program
         }
       }
 
+      // Ponytail (git submodule at repo root, vendored to ~/.config/opencode/ponytail/)
+      // Plugin path: ./ponytail/.opencode/plugins/ponytail.mjs (relative to opencode.jsonc)
+      // 6 commands are symlinked from the vendored copy into configDest/commands/
+      // 6 skills are auto-discovered by the plugin via config.skills.paths
+      const srcPonytail = join(PKG_ROOT, 'ponytail');
+      const destPonytail = join(configDest, 'ponytail');
+      if (existsSync(srcPonytail) && existsSync(join(srcPonytail, '.opencode', 'plugins', 'ponytail.mjs'))) {
+        if (existsSync(destPonytail) && !opts.force) {
+          console.log(`  skip: ponytail/ already exists (use --force to overwrite)`);
+        } else {
+          if (existsSync(destPonytail)) rmSync(destPonytail, { recursive: true, force: true });
+          cpSync(srcPonytail, destPonytail, { recursive: true });
+          configCount++;
+        }
+
+        // Symlink 6 commands
+        const srcPtCommands = join(srcPonytail, '.opencode', 'command');
+        const destCommandsDir = join(configDest, 'commands');
+        if (existsSync(srcPtCommands) && existsSync(destCommandsDir)) {
+          for (const cmd of readdirSync(srcPtCommands)) {
+            if (!cmd.startsWith('ponytail')) continue;
+            const link = join(destCommandsDir, cmd);
+            const target = join(destPonytail, '.opencode', 'command', cmd);
+            try {
+              if (lstatSync(link).isSymbolicLink() || lstatSync(link).isFile()) unlinkSync(link);
+            } catch (e) { /* not present */ }
+            try {
+              symlinkSync(target, link);
+              configCount++;
+            } catch (e) {
+              console.log(`  warn: could not symlink ${cmd}: ${e.message}`);
+            }
+          }
+        }
+
+        // Ponytail mode config (~/.config/ponytail/config.json)
+        const ptConfigDir = join(homedir(), '.config', 'ponytail');
+        const ptConfigFile = join(ptConfigDir, 'config.json');
+        if (!existsSync(ptConfigFile)) {
+          mkdirSync(ptConfigDir, { recursive: true });
+          writeFileSync(ptConfigFile, JSON.stringify({ defaultMode: 'full' }, null, 2) + '\n');
+          console.log(`  created: ${ptConfigFile} (defaultMode: full)`);
+          configCount++;
+        }
+      } else if (!opts.skipConfig) {
+        console.log('  warn: ponytail/ submodule not initialized; run `git submodule update --init` then re-run init');
+      }
+
       console.log(`\nInstalled:`);
       if (!opts.skipSkills) console.log(`  ${skillsCount} skills → ${skillsDest}`);
       if (!opts.skipAgents) console.log(`  ${agentsCount} agents → ${agentsDest}`);
@@ -296,6 +345,12 @@ program
       if (existsSync(join(configDir, 'AGENTS.md'))) {
         configItems.push(`  AGENTS.md: present`);
       }
+      const ponytailDir = join(configDir, 'ponytail');
+      if (existsSync(ponytailDir)) {
+        const skillCount = readdirSync(join(ponytailDir, 'skills'), { withFileTypes: true })
+          .filter(e => e.isDirectory()).length;
+        configItems.push(`  ponytail: vendored (${skillCount} skills)`);
+      }
 
       if (configItems.length === 0) {
         console.log('  (none)');
@@ -365,6 +420,7 @@ program
           join(configDest, 'commands'),
           join(configDest, 'opencode.jsonc'),
           join(configDest, 'AGENTS.md'),
+          join(configDest, 'ponytail'),
         ];
         for (const item of configItems) {
           if (existsSync(item)) {

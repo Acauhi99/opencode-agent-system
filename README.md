@@ -1,6 +1,6 @@
 # OpenCode Agent System
 
-> Complete backup of an OpenCode environment: 43 skills, 16 agents, config, plugins, instructions, and a fully automated setup script. If your PC catches fire, one command rebuilds everything.
+> Complete backup of an OpenCode environment: 43 skills, 16 agents, config, plugins, instructions, bundled Ponytail (lazy senior dev mode), and a fully automated setup script. If your PC catches fire, one command rebuilds everything.
 
 Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) — opinionated, production-hardened SKILL.md workflows and reviewer subagents, optimized for OpenCode with CodeGraph-native awareness.
 
@@ -10,24 +10,27 @@ Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) —
 |-----------|-------|-------------|
 | Skills | 43 | Workflow orchestrators (features, bugs, audits, git, docs, infra) |
 | Agents | 16 | Read-only reviewers + utility subagents |
-| Instructions | 5 | Behavioral rules loaded every session |
-| Plugins | 2 | Guardrails (bash safety) + AgentMemory capture |
-| Commands | 2 | `/recall` and `/remember` for persistent memory |
-| Config | 1 | `opencode.jsonc` + `AGENTS.md` |
+| Instructions | 5 | Behavioral rules loaded every session (caveman, deep-thinker, simplify, harden-types, subagent-orchestration) |
+| Plugins | 3 | Guardrails (bash safety) + AgentMemory capture + **Ponytail** (lazy senior dev / YAGNI code-writing ruleset) |
+| Commands | 8 | `/recall`, `/remember` + 6 Ponytail commands (`/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help`) |
+| Config | 1 | `opencode.jsonc` + `AGENTS.md` + `~/.config/ponytail/config.json` |
 | Wrapper | 1 | Auto-starts AgentMemory before OpenCode |
 | Setup script | 1 | Fully automated installation from scratch |
+| Ponytail submodule | 1 | Pinned git submodule at `ponytail/`, vendored to `~/.config/opencode/ponytail/` on install |
 
 ## Quick Start (Full Setup)
 
 If you have a fresh machine:
 
 ```bash
-git clone https://github.com/Acauhi99/opencode-agent-system.git
+git clone --recurse-submodules https://github.com/Acauhi99/opencode-agent-system.git
 cd opencode-agent-system
 bash scripts/setup.sh
 ```
 
-This installs everything: Node.js, OpenCode binary, MCP servers, LSP servers, config files, skills, agents, and the wrapper script.
+If you forgot `--recurse-submodules`, the setup script auto-runs `git submodule update --init` for you.
+
+This installs everything: Node.js, OpenCode binary, MCP servers, LSP servers, config files, skills, agents, the wrapper script, and the Ponytail plugin.
 
 ## Install (CLI Only)
 
@@ -75,7 +78,27 @@ After installing, open OpenCode and use these commands:
 /audit                          # whole-codebase tech-debt sweep
 /recall [query]                 # search past session memories
 /remember [insight]             # save to persistent memory
+
+# Ponytail (lazy senior dev mode) — auto-active at level `full`
+/ponytail                       # show current level
+/ponytail lite|full|ultra|off   # switch intensity mid-session
+/ponytail-review                # over-engineering review of the current diff
+/ponytail-audit                 # over-engineering audit of the whole repo
+/ponytail-debt                  # harvest `ponytail:` shortcut comments
+/ponytail-gain                  # show the benchmark scoreboard
 ```
+
+## Ponytail (Lazy Senior Dev Mode)
+
+Ponytail is a YAGNI-driven code-writing ruleset. The plugin injects the ruleset into every turn's system prompt — no need to invoke it manually. It governs what the agent builds, while `caveman-always` (an instruction, still active) governs how the agent talks.
+
+**Pair is intentional** — the two solve different problems and stack cleanly:
+- `caveman-always.md` → terse prose, drop filler
+- `ponytail` (plugin) → minimal code, "stop at the first rung that holds"
+
+Default mode is `full`. Change with `~/.config/ponytail/config.json` (key: `defaultMode` = `lite` | `full` | `ultra` | `off`) or env `PONYTAIL_DEFAULT_MODE`. Per-session switch: `/ponytail <level>`. The plugin vendors itself to `~/.config/opencode/ponytail/` and symlinks its 6 commands into `~/.config/opencode/commands/`.
+
+Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (pinned to v4.8.0 in this package).
 
 ## Project Structure
 
@@ -85,16 +108,23 @@ opencode-agent-system/
 │   └── index.js              # CLI: init, list, uninstall, setup
 ├── agents/                   # 16 subagent definitions (.md)
 ├── skills/                   # 43 skill directories (SKILL.md each)
+├── ponytail/                 # git submodule @ v4.8.0 (lazy senior dev mode)
+│   ├── .opencode/
+│   │   ├── plugins/ponytail.mjs
+│   │   └── command/          # 6 ponytail commands
+│   ├── skills/               # 6 ponytail skills
+│   └── hooks/                # ruleset + config builder
 ├── config/                   # OpenCode config backup
 │   ├── opencode.jsonc        # Main config (MCP, permissions, plugins)
 │   ├── AGENTS.md             # CodeGraph usage guide
 │   ├── instructions/         # 5 behavioral instruction files
-│   ├── plugins/              # 2 TypeScript plugins
-│   └── commands/             # 2 custom commands
+│   ├── plugins/              # 2 TypeScript plugins (guardrails + agentmemory)
+│   └── commands/             # 2 custom commands (recall + remember)
 ├── scripts/                  # Setup automation
-│   ├── setup.sh              # Full install script
+│   ├── setup.sh              # Full install script (init submodules + copy)
 │   ├── opencode-wrapper      # Wrapper that auto-starts AgentMemory
 │   └── requirements.txt      # Global npm packages list
+├── .gitmodules               # ponytail submodule reference
 ├── package.json
 ├── README.md
 └── LICENSE
@@ -133,3 +163,5 @@ MIT — same as the original AgentSystemLabs/core.
 ## Credits
 
 Built on the excellent work of [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core). The original skills were designed for Claude Code; this adaptation retargets them for OpenCode with CodeGraph-native codebase exploration, `question` tool for user prompts, and OpenCode's subagent architecture.
+
+Bundles [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) as a git submodule (v4.8.0) for the lazy senior dev / YAGNI code-writing ruleset.
