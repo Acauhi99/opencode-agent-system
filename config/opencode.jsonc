@@ -3,14 +3,12 @@
   "instructions": [
     "/home/acauhi/.config/opencode/instructions/caveman-always.md",
     "/home/acauhi/.config/opencode/instructions/subagent-orchestration-always.md",
-    "/home/acauhi/.config/opencode/instructions/simplify-always.md",
-    "/home/acauhi/.config/opencode/instructions/harden-types-always.md",
-    "/home/acauhi/.config/opencode/instructions/deep-thinker-always.md"
+    "/home/acauhi/.config/opencode/instructions/guardrails.md"
   ],
+  "compaction": { "auto": true, "prune": true, "reserved": 10000 },
   "lsp": true,
   "plugin": [
     "./plugin/guardrails.ts",
-    "./plugin/agentmemory-capture.ts",
     "./ponytail/.opencode/plugins/ponytail.mjs"
   ],
   "permission": {
@@ -50,6 +48,16 @@
       "sudo rm -fr /*": "deny",
       "git reset --hard*": "deny",
       "git clean -f*": "deny",
+      "git push --force*": "deny",
+      "git push -f*": "deny",
+      "git push": "ask",
+      "git push *": "ask",
+      "git branch -D": "ask",
+      "curl | bash": "deny",
+      "curl | sh": "deny",
+      "curl | zsh": "deny",
+      "wget | bash": "deny",
+      "wget | sh": "deny",
       "mkfs*": "deny",
       "mke2fs*": "deny",
       "fdisk*": "deny",
@@ -69,8 +77,8 @@
       "sudo halt*": "deny",
       "docker system prune*--volumes*": "deny",
       "docker system prune*-a*": "deny",
-      "docker volume rm*": "deny",
-      "docker volume prune*": "deny",
+      "docker volume rm*": "ask",
+      "docker volume prune*": "ask",
       "docker compose down *-v*": "deny",
       "docker-compose down *-v*": "deny",
       "terraform destroy*": "deny",

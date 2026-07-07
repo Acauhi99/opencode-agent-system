@@ -2,7 +2,7 @@
 
 Global rules for any agent running in this workspace:
 
-1. Never run destructive system-level deletion commands. Disallow patterns like `rm -rf /`, `rm -rf ~`, `rm -rf /var`, `rm -rf /usr`, `rm -rf /etc`, wildcard mass deletes, and Docker host-path deletes.
+1. `rm` and deletion commands require explicit human approval via conversation with the main agent in the current message before execution. Never run `rm` autonomously — always ask first. Wildcard mass deletes (`rm -rf /`, `rm -rf ~`, `rm -rf /var`, `rm -rf /usr`, `rm -rf /etc`) and Docker host-path deletes remain forbidden even with approval.
 2. Never run destructive git commands unless user explicitly asks in the current message. Disallow `git reset --hard`, `git clean -fd`, `git branch -D`, `git checkout .`, and `git restore .`.
 3. Never run `git push` without explicit user authorization in the current message.
 4. Avoid context-flooding commands. Do not run broad scans from filesystem roots (`rg /`, `find /`) or dump very large files/logs directly.
