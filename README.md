@@ -1,6 +1,6 @@
 # OpenCode Agent System
 
-> Complete backup of an OpenCode environment: 43 skills, 16 agents, config, plugins, instructions, bundled Ponytail (lazy senior dev mode), and a fully automated setup script. If your PC catches fire, one command rebuilds everything.
+> Complete backup of an OpenCode environment: 50 skills, 8 agents, config, plugins, instructions, bundled Ponytail (lazy senior dev mode), and a fully automated setup script. If your PC catches fire, one command rebuilds everything.
 
 Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) — opinionated, production-hardened SKILL.md workflows and reviewer subagents, optimized for OpenCode with CodeGraph-native awareness.
 
@@ -8,10 +8,10 @@ Adapted from [AgentSystemLabs/core](https://github.com/AgentSystemLabs/core) —
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| Skills | 43 | Workflow orchestrators (features, bugs, audits, git, docs, infra) |
-| Agents | 16 | Read-only reviewers + utility subagents |
-| Instructions | 5 | Behavioral rules loaded every session (caveman, deep-thinker, simplify, harden-types, subagent-orchestration) |
-| Plugins | 3 | Guardrails (bash safety) + AgentMemory capture + **Ponytail** (lazy senior dev / YAGNI code-writing ruleset) |
+| Skills | 50 | Workflow orchestrators (features, bugs, audits, git, docs, infra) |
+| Agents | 8 | Read-only reviewers + utility subagents |
+| Instructions | 9 | Behavioral rules loaded every session (caveman, subagent-orchestration, guardrails, auto-context, memory-save-rules, sleep-short, harden-types, simplify, deep-thinker) |
+| Plugins | 2 | Guardrails (bash safety) + **Ponytail** (lazy senior dev / YAGNI code-writing ruleset) |
 | Commands | 8 | `/recall`, `/remember` + 6 Ponytail commands (`/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help`) |
 | Config | 1 | `opencode.jsonc` + `AGENTS.md` + `~/.config/ponytail/config.json` |
 | Wrapper | 1 | Auto-starts AgentMemory before OpenCode |
@@ -106,8 +106,8 @@ Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (p
 opencode-agent-system/
 ├── cli/
 │   └── index.js              # CLI: init, list, uninstall, setup
-├── agents/                   # 16 subagent definitions (.md)
-├── skills/                   # 43 skill directories (SKILL.md each)
+├── agents/                   # 8 subagent definitions (.md)
+├── skills/                   # 50 skill directories (SKILL.md each)
 ├── ponytail/                 # git submodule @ v4.8.0 (lazy senior dev mode)
 │   ├── .opencode/
 │   │   ├── plugins/ponytail.mjs
@@ -117,9 +117,9 @@ opencode-agent-system/
 ├── config/                   # OpenCode config backup
 │   ├── opencode.jsonc        # Main config (MCP, permissions, plugins)
 │   ├── AGENTS.md             # CodeGraph usage guide
-│   ├── instructions/         # 5 behavioral instruction files
-│   ├── plugins/              # 2 TypeScript plugins (guardrails + agentmemory)
-│   └── commands/             # 2 custom commands (recall + remember)
+│   ├── instructions/         # 9 behavioral instruction files
+│   ├── plugins/              # 1 TypeScript plugin (guardrails)
+│   └── commands/             # 8 custom commands (recall + remember + 6 ponytail)
 ├── scripts/                  # Setup automation
 │   ├── setup.sh              # Full install script (init submodules + copy)
 │   ├── opencode-wrapper      # Wrapper that auto-starts AgentMemory

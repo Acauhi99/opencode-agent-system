@@ -260,19 +260,19 @@ verify() {
   # Check skills count
   local skill_count
   skill_count=$(ls "$OPENCODE_CONFIG_DIR/skills/" 2>/dev/null | wc -l)
-  if (( skill_count == 43 )); then
-    ok "Skills: $skill_count/43"
+  if (( skill_count == 50 )); then
+    ok "Skills: $skill_count/50"
   else
-    warn "Skills: $skill_count/43 (expected 43)"
+    warn "Skills: $skill_count/50 (expected 50)"
   fi
 
   # Check agents count
   local agent_count
   agent_count=$(ls "$OPENCODE_CONFIG_DIR/agents/" 2>/dev/null | wc -l)
-  if (( agent_count == 16 )); then
-    ok "Agents: $agent_count/16"
+  if (( agent_count == 8 )); then
+    ok "Agents: $agent_count/8"
   else
-    warn "Agents: $agent_count/16 (expected 16)"
+    warn "Agents: $agent_count/8 (expected 8)"
   fi
 
   # Check Ponytail

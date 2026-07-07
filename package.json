@@ -1,7 +1,7 @@
 {
   "name": "@acauhi/opencode-agent-system",
-  "version": "0.4.0",
-  "description": "Complete OpenCode backup: 43 skills, 16 agents, config, plugins, instructions, setup script, and bundled Ponytail (lazy senior dev mode) plugin.",
+  "version": "0.5.0",
+  "description": "Complete OpenCode backup: 50 skills, 8 agents, config, plugins, instructions, setup script, and bundled Ponytail (lazy senior dev mode) plugin.",
   "license": "MIT",
   "bin": {
     "opencode-agent-system": "./cli/index.js"
